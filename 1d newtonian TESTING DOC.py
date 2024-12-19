@@ -9,10 +9,10 @@ plt.show(block=True)
 x, y, z, t, vx, vy, vz = symbols("x y z t vx vy vz")
 
 #initial values
-state0 = np.array([100., 100.]) #x0, vx0
+state0 = np.array([10., 10]) #x0, vx0
 t0 = 0.
 dim = 2
-h = 0.0001 #setting step size
+h = 0.00001 #setting step size
 n = 250000
 labels = ["x(t)", "vx(t)"]
 
@@ -45,25 +45,29 @@ def odesolver(t, n, h): #For number of iterations 'n' and stepsize 'h'
     xval = values[:,0]
     tval= tval
     t_ints = []
-    for i in range(len(xval)-1):
-        if min(xval[i], xval[i+1]) <= 100. <= max(xval[i], xval[i+1]):
-            local_interpolator = interp1d(
-                [xval[i], xval[i+1]], 
-                [tval[i], tval[i+1]], 
-                bounds_error=True)
-            t_ints.append(local_interpolator(100.))
-    for i in range(dim):
-         print(f"max value for {labels[i]} is {max(values[:,i])}.")
+    for i in range(len(xval) - 1):
+        if min(xval[i], xval[i + 1]) <= state0[0] <= max(xval[i], xval[i + 1]):
+            local_interpolator = interp1d([xval[i], xval[i + 1]], [tval[i].flatten()[0], tval[i + 1].flatten()[0]], bounds_error=True)
+            t_ints.append(local_interpolator(state0[0]))
 
-         
-         #figuring out code to see when it crosses
-         
-         plt.plot(tval, values[:,i], label = labels[i])
+    if not t_ints:
+        print("No intersection found where x(t) = initial state")
+    else:
+        print(f"Intersection times where x(t) = initial state: {[float(time) for time in t_ints]}")
+        print(f"Analytic result to compare: {[float(2.*state0[1]/9.8)]}")
+
+    for i in range(dim):
+        max_value = max(values[:, i])
+        max_index = np.argmax(values[:, i])
+        max_time = tval[max_index]
+        print(f"Max value for {labels[i]} is {max_value} at time t = {max_time}.")
+
+        plt.plot(tval, values[:,i], label = labels[i])
     plt.xlabel("Time (t)")
     plt.ylabel("Values")
     plt.title("Runge-Kutta Solution")
     plt.grid()
     plt.legend()
     plt.show()
-#running the function
-odesolver(t, n, h) 
+
+intersection_times = odesolver(t0, n, h)
