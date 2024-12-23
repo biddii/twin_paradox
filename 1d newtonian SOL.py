@@ -9,7 +9,7 @@ plt.show(block=True)
 x, y, z, t, vx, vy, vz = symbols("x y z t vx vy vz")
 
 #initial values
-state0 = np.array([10., 10]) #x0, vx0
+state0 = np.array([0., 0]) #x0, vx0 
 t0 = 0.
 dim = 2
 h = 0.00001 #setting step size
@@ -19,7 +19,7 @@ labels = ["x(t)", "vx(t)"]
 def dSdt(state, t): #where state is an array
     x, vx = state
     dxdt = (vx)
-    dvxdt = (-9.8)
+    dvxdt = (np.sin(t*10))
     val = np.array([dxdt, dvxdt])
     return val
 
