@@ -5,16 +5,22 @@ from sympy import *
 import matplotlib.pyplot as plt
 from scipy.interpolate import interp1d
 plt.show(block=True)
-
 x, y, z, t, vx, vy, vz = symbols("x y z t vx vy vz")
+#initial values & conditions IF I WANT TO CHANGE STUFF IT WILL ONLY NEED TO BE CHANGED UP TO ODESOLVER
 
-#initial values
-state0 = np.array([10., 0., 15., -1.]) #x0, y0, z0, vx0, vy0, vz0
+
+vmagnitude = 28 #i can change this also
+launch_angle = np.pi*0.35 # i can change this value
+v_x = np.cos(launch_angle)*vmagnitude
+v_y = np.sin(launch_angle)*vmagnitude
+print(f"vx0 = {v_x}, vy0 = {v_y}")
+state0 = np.array([10., 0., v_x, v_y]) #x0, y0, z0, vx0, vy0, vz0
 t0 = 0.
 dim = 4
-h = 0.01 #setting step size
-n = 1500
+h = 0.0001 #setting step size
+n = 100000
 labels = ["x(t)", "y(t)", "vx(t)", "vy(t)"]
+
 
 def dSdt(state, t): #where state is an array
     x, y, vx, vy = state
@@ -24,8 +30,7 @@ def dSdt(state, t): #where state is an array
     dvydt = (np.sin(t))
     val = np.array([dxdt, dydt, dvxdt, dvydt])
     return val
-
-def odesolver(t, n, h): #For number of iterations 'n' and stepsize 'h'
+def odesolver(t, n, h): #For number of iterations 'n' and stepsize 'h' THE ACTUAL SOLVER 
     state = state0
     t = t0
     tval = np.zeros([n, 1])
@@ -38,12 +43,10 @@ def odesolver(t, n, h): #For number of iterations 'n' and stepsize 'h'
         k4 = dSdt((state+((h*0.5)*k3)), t+h)
         state = state + (h/6.)*(k1+2*k2+2*k3+k4)
         t += h
-
         #adding each position value to an array, so it can be plotted
         values[j] = state
         tval[j] = t 
     #plotting
-
     t_ints = []
     for j in range(int(dim*0.5)):
         val = values[:, j]
@@ -57,7 +60,6 @@ def odesolver(t, n, h): #For number of iterations 'n' and stepsize 'h'
         else:
             print(f"Intersection times where {labels[j]} = initial state: {[float(time) for time in t_ints]}")
         t_ints = [] 
-
     for i in range(dim):
         max_value = max(values[:, i])
         max_index = np.argmax(values[:, i])
@@ -70,5 +72,4 @@ def odesolver(t, n, h): #For number of iterations 'n' and stepsize 'h'
     plt.grid()
     plt.legend()
     plt.show()
-
-odesolver(t0, n, h)
+odesolver(t0, n, h) #running the code
