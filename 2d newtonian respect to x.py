@@ -48,18 +48,28 @@ def odesolver(t, n, h): #For number of iterations 'n' and stepsize 'h' THE ACTUA
         tval[j] = t 
     #plotting
     t_ints = []
+    x_ints = []
     for j in range(int(dim*0.5)):
         val = values[:, j]
+        xval = values[:,0]
         for i in range(len(val) - 1):
             if min(val[i], val[i + 1]) <= state0[j] <= max(val[i], val[i + 1]):
                 local_interpolator = interp1d([val[i], val[i + 1]], [tval[i].flatten()[0], tval[i + 1].flatten()[0]], bounds_error=True)
                 t_ints.append(local_interpolator(state0[j]))
-
+                if j > 0:
+                    local_interpolator = interp1d([val[i], val[i + 1]], [xval[i].flatten()[0], xval[i + 1].flatten()[0]], bounds_error=True)
+                    x_ints.append(local_interpolator(state0[j]))       
         if not t_ints:
-            print(f"No intersection found where {labels[j]} = initial state")
+            print(f"No time found where {labels[j]} = initial state")
         else:
-            print(f"Intersection times where {labels[j]} = initial state: {[float(time) for time in t_ints]}")
-        t_ints = [] 
+            print(f"Times where {labels[j]} = initial state: {[float(time) for time in t_ints]}")
+        if not x_ints and j > 0:
+            print(f"No x found where {labels[j]} = initial state")
+        if x_ints and j > 0:
+            print(f"x value where {labels[j]} = initial state: {[float(time) for time in x_ints]}")
+        t_ints = []
+
+
     for i in range(dim):
         max_value = max(values[:, i])
         max_index = np.argmax(values[:, i])
