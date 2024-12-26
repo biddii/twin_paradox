@@ -26,8 +26,8 @@ def dSdt(state, t): #where state is an array
     x, y, vx, vy = state
     dxdt = (vx)
     dydt = (vy)
-    dvxdt = (-10)
-    dvydt = (np.sin(t))
+    dvxdt = (0)
+    dvydt = (-9.8)
     val = np.array([dxdt, dydt, dvxdt, dvydt])
     return val
 def odesolver(t, n, h): #For number of iterations 'n' and stepsize 'h' THE ACTUAL SOLVER 
