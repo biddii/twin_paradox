@@ -18,10 +18,10 @@ state0 = np.array([0., 10., v_x, v_y]) #x0, y0, z0, vx0, vy0, vz0
 t0 = 0.
 dim = 4
 h = 0.01 #setting step size
-n = 1450
+n = 2000
 labels = ["x(t)", "y(t)", "vx(t)", "vy(t)"]
 xlabels = ["x(x)", "y(x)", "vx(x)", "vy(x)"]
-
+special_testing_dict = ["y(x)", "analytic y(x)"]
 
 def dSdt(state, t): #where state is an array
     x, y, vx, vy = state
@@ -79,12 +79,58 @@ def odesolver(t, n, h): #For number of iterations 'n' and stepsize 'h' THE ACTUA
         if 0 < i <= dim*0.5-1:
             xmax = values[max_index, 0]
             print(f"Max value for {xlabels[i]} is {max_value} at x = {xmax}.")
+    analytic = np.zeros([n,1])
+    for i in range(len(val)):
+        analytic[i] = state0[1]+(state0[3]/state0[2])*(values[i,0]-state0[0])-(9.8/(2*(state0[2])**2))*((values[i,0]))**2
+    yval1 = values[:,1]
+    analytic_vs_calculated = np.column_stack((yval1, analytic))
 
-    plt.plot(values[:,0], values[:,1], label = labels[1])
+    #plt.plot(values[:,0], analytic, label = "Analytic Solution")
+    for i in range(2):
+        plt.plot(values[:,0], analytic_vs_calculated[:,i], label = special_testing_dict[i])
     plt.xlabel("x Position")
     plt.ylabel("y Position")
     plt.title("Displacement path of the particle")
     plt.grid()
     plt.legend()
     plt.show()
-odesolver(t0, n, h) #running the code
+odesolver(t0, n, h) 
+vmagnitude = 72 
+launch_angle = np.pi*0.25 
+v_x = np.cos(launch_angle)*vmagnitude
+v_y = np.sin(launch_angle)*vmagnitude
+print(f"vx0 = {v_x}, vy0 = {v_y}")
+state0 = np.array([0., 0., v_x, v_y])
+ 
+odesolver(t0, n, h)
+vmagnitude = 67
+launch_angle = np.pi*0.25
+v_x = np.cos(launch_angle)*vmagnitude
+v_y = np.sin(launch_angle)*vmagnitude
+print(f"vx0 = {v_x}, vy0 = {v_y}")
+state0 = np.array([0., 0., v_x, v_y])
+
+odesolver(t0, n, h)
+vmagnitude = 20
+launch_angle = np.pi*0.25
+v_x = np.cos(launch_angle)*vmagnitude
+v_y = np.sin(launch_angle)*vmagnitude
+print(f"vx0 = {v_x}, vy0 = {v_y}")
+state0 = np.array([0., 0., v_x, v_y])
+
+odesolver(t0, n, h)
+vmagnitude = 122 
+launch_angle = np.pi*0.25
+v_x = np.cos(launch_angle)*vmagnitude
+v_y = np.sin(launch_angle)*vmagnitude
+print(f"vx0 = {v_x}, vy0 = {v_y}")
+state0 = np.array([0., 0., v_x, v_y])
+
+odesolver(t0, n, h)#running the code
+vmagnitude = 10 
+launch_angle = np.pi*0.25
+v_x = np.cos(launch_angle)*vmagnitude
+v_y = np.sin(launch_angle)*vmagnitude
+print(f"vx0 = {v_x}, vy0 = {v_y}")
+state0 = np.array([0., 0., v_x, v_y])
+odesolver(t0, n, h)#running the code

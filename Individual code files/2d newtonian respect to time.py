@@ -14,11 +14,11 @@ launch_angle = np.pi*0.35 # i can change this value
 v_x = np.cos(launch_angle)*vmagnitude
 v_y = np.sin(launch_angle)*vmagnitude
 print(f"vx0 = {v_x}, vy0 = {v_y}")
-state0 = np.array([10., 0., v_x, v_y]) #x0, y0, z0, vx0, vy0, vz0
+state0 = np.array([0., 10., v_x, v_y]) #x0, y0, z0, vx0, vy0, vz0
 t0 = 0.
 dim = 4
-h = 0.0001 #setting step size
-n = 100000
+h = 0.01 #setting step size
+n = 1000
 labels = ["x(t)", "y(t)", "vx(t)", "vy(t)"]
 
 
