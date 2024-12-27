@@ -16,6 +16,8 @@ h = 0.01 #setting step size
 n = 1500
 labels = ["x(t)", "y(t)", "z(t)", "vx(t)", "vy(t)", "vz(t)"]
 
+
+
 def dSdt(state, t): #where state is an array
     x, y, z, vx, vy, vz = state
     dxdt = (vx)

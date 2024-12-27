@@ -3,27 +3,37 @@ import numpy as np
 import math
 from sympy import *
 import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import axes3d
 from scipy.interpolate import interp1d
+from Objects import *
+
 plt.show(block=True)
 
 x, y, z, t, vx, vy, vz = symbols("x y z t vx vy vz")
 
 #initial values
-state0 = np.array([10., 0., 0., 15., -1., 20.]) #x0, y0, z0, vx0, vy0, vz0
+state0 = np.array([10000., 10000., 0., np.sqrt((((2*6.6743*10**-11)*2*10**15)/np.sqrt(2*10**8))/2), -np.sqrt((((2*6.6743*10**-11)*2*10**15)/np.sqrt(2*10**8))/2), 0.]) #x0, y0, z0, vx0, vy0, vz0
 t0 = 0.
-dim = 6
-h = 0.01 #setting step size
-n = 1500
+dim = len(state0) #dimensions of state0
+h = 1 #setting step size 
+n = 50000
+mass1 = 2.*(10**15)
+Gconst = 6.67430*(10**-11)
 labels = ["x(t)", "y(t)", "z(t)", "vx(t)", "vy(t)", "vz(t)"]
+#    velocity_mag = np.sqrt((state[3])**2+(state[4])**2+(state[5])**2) #velocity magnitude from target mass
+
 
 def dSdt(state, t): #where state is an array
     x, y, z, vx, vy, vz = state
-    dxdt = (vx)
+    pos_mag = np.sqrt((state[0])**2+(state[1])**2+(state[2])**2) #position magnitude from target mass
+    normal_pos = state[0:3]/pos_mag #position direction but magnitude is 1.
+    gravity_acceleration = -((Gconst*mass1)/(pos_mag**2))*normal_pos
+    dxdt = (vx) 
     dydt = (vy)
     dzdt = (vz)
-    dvxdt = (-10)
-    dvydt = (np.sin(t))
-    dvzdt = (-3) 
+    dvxdt = (gravity_acceleration[0])
+    dvydt = (gravity_acceleration[1])
+    dvzdt = (gravity_acceleration[2]) 
     val = np.array([dxdt, dydt, dzdt, dvxdt, dvydt, dvzdt])
     return val
 
@@ -47,9 +57,9 @@ def odesolver(t, n, h): #For number of iterations 'n' and stepsize 'h'
     #plotting
 
     t_ints = []
-    for j in range(int(dim*0.5)):
+    for j in range(int(dim*0.5-1)): #to include z get rid of -1
         val = values[:, j]
-        for i in range(len(val) - 1):
+        for i in range(len(val) - 2): #to include z change -2 to -1
             if min(val[i], val[i + 1]) <= state0[j] <= max(val[i], val[i + 1]):
                 local_interpolator = interp1d([val[i], val[i + 1]], [tval[i].flatten()[0], tval[i + 1].flatten()[0]], bounds_error=True)
                 t_ints.append(local_interpolator(state0[j]))
@@ -59,18 +69,13 @@ def odesolver(t, n, h): #For number of iterations 'n' and stepsize 'h'
         else:
             print(f"Intersection times where {labels[j]} = initial state: {[float(time) for time in t_ints]}")
         t_ints = [] 
-
     for i in range(dim):
         max_value = max(values[:, i])
         max_index = np.argmax(values[:, i])
         max_time = tval[max_index]
         print(f"Max value for {labels[i]} is {max_value} at time t = {max_time}.")
-        plt.plot(tval, values[:,i], label = labels[i])
-    plt.xlabel("Time (t)")
-    plt.ylabel("Values")
-    plt.title("Runge-Kutta Solution")
-    plt.grid()
-    plt.legend()
-    plt.show()
+      
+    plotter = stationary_plot(values)
+    plotter.plotf()
 
 odesolver(t0, n, h)
