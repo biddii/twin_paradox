@@ -17,7 +17,7 @@ class rotating_plot:
         plt.xlabel("x Position")
         plt.ylabel("y Position")
         for angle in range(0, 360):
-            ax.view_init(10, angle)
+            ax.view_init(30, angle)
             plt.draw()
             plt.pause(.01)
 

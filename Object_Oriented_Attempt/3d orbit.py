@@ -12,13 +12,13 @@ plt.show(block=True)
 x, y, z, t, vx, vy, vz = symbols("x y z t vx vy vz")
 
 #initial values
-state0 = np.array([10000., 10000., 0., np.sqrt((((2*6.6743*10**-11)*2*10**15)/np.sqrt(2*10**8))/2), -np.sqrt((((2*6.6743*10**-11)*2*10**15)/np.sqrt(2*10**8))/2), 0.]) #x0, y0, z0, vx0, vy0, vz0
-t0 = 0.
-dim = len(state0) #dimensions of state0
-h = 1 #setting step size 
-n = 50000
 mass1 = 2.*(10**15)
 Gconst = 6.67430*(10**-11)
+state0 = np.array([10000., 10000., 0., np.sqrt((((Gconst*mass1))/np.sqrt(2*10**8))/2), -np.sqrt(((Gconst*mass1)/np.sqrt(2*10**8))/2), 0.]) #x0, y0, z0, vx0, vy0, vz0
+t0 = 0.
+dim = len(state0) #dimensions of state0
+h = 0.01 #setting step size 
+n = 3000000
 labels = ["x(t)", "y(t)", "z(t)", "vx(t)", "vy(t)", "vz(t)"]
 #    velocity_mag = np.sqrt((state[3])**2+(state[4])**2+(state[5])**2) #velocity magnitude from target mass
 
@@ -68,14 +68,15 @@ def odesolver(t, n, h): #For number of iterations 'n' and stepsize 'h'
             print(f"No intersection found where {labels[j]} = initial state")
         else:
             print(f"Intersection times where {labels[j]} = initial state: {[float(time) for time in t_ints]}")
-        t_ints = [] 
+        t_ints = []
+
     for i in range(dim):
         max_value = max(values[:, i])
         max_index = np.argmax(values[:, i])
         max_time = tval[max_index]
         print(f"Max value for {labels[i]} is {max_value} at time t = {max_time}.")
       
-    plotter = stationary_plot(values)
+    plotter = Stationary_plot(values)
     plotter.plotf()
 
 odesolver(t0, n, h)

@@ -19,7 +19,7 @@ labels = ["x(t)", "vx(t)"]
 def dSdt(state, t): #where state is an array
     x, vx = state
     dxdt = (vx)
-    dvxdt = (np.sin(t*10))
+    dvxdt = (-9.8)
     val = np.array([dxdt, dvxdt])
     return val
 
