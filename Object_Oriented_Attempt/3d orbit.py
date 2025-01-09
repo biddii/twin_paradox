@@ -57,17 +57,20 @@ def odesolver(t, n, h): #For number of iterations 'n' and stepsize 'h'
     #plotting
 
     t_ints = []
+    step_int = []
     for j in range(int(dim*0.5-1)): #to include z get rid of -1
         val = values[:, j]
         for i in range(len(val) - 2): #to include z change -2 to -1
             if min(val[i], val[i + 1]) <= state0[j] <= max(val[i], val[i + 1]):
                 local_interpolator = interp1d([val[i], val[i + 1]], [tval[i].flatten()[0], tval[i + 1].flatten()[0]], bounds_error=True)
                 t_ints.append(local_interpolator(state0[j]))
+                step_int.append(i)
 
         if not t_ints:
             print(f"No intersection found where {labels[j]} = initial state")
         else:
             print(f"Intersection times where {labels[j]} = initial state: {[float(time) for time in t_ints]}")
+            print(f"step this occurs on is {step_int}")
         t_ints = []
 
     for i in range(dim):

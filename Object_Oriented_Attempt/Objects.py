@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import axes3d
 from scipy.interpolate import interp1d
 
-class rotating_plot:
+class Rotating_plot:
     def __init__(self, values):
          self.values = values
          
@@ -21,7 +21,7 @@ class rotating_plot:
             plt.draw()
             plt.pause(.01)
 
-class stationary_plot:
+class Stationary_plot:
     def __init__(self, values):
         self.values = values
     
