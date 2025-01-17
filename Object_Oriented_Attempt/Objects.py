@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import axes3d
 from scipy.interpolate import interp1d
 
-class rotating_plot:
+class Rotating_plot:
     def __init__(self, values):
          self.values = values
          
@@ -21,10 +21,24 @@ class rotating_plot:
             plt.draw()
             plt.pause(.01)
 
-class stationary_plot:
+class Stationary_plot:
     def __init__(self, values):
         self.values = values
     
+    def plotf(self):
+        fig = plt.figure()
+        ax = plt.axes(projection = '3d')
+        ax.plot3D(self.values[:,0], self.values[:,1], self.values[:,2], 'red')
+        ax.set_title('3d spatial path of orbit')
+        ax.set_xlabel('x position')
+        ax.set_ylabel('y position')
+        ax.set_zlabel('z position')
+        plt.show()
+
+class Polar_stationary_plot:
+    def __init__(self, xyz_values):
+        self.values = xyz_values
+
     def plotf(self):
         fig = plt.figure()
         ax = plt.axes(projection = '3d')
