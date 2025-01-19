@@ -14,7 +14,7 @@ x, y, z, t, vx, vy, vz, r, th, ph, vr, vth, vph= symbols("x y z t vx vy vz r th 
 #initial values
 mass1 = 2.E15
 Gconst = 6.67430E-11
-state0 = np.array([1e7, 0.5*np.pi, 0, 0, 0, 50*np.sqrt((Gconst*mass1)/10000000)]) #r0, th0, ph0, vr0, vth0, vph0
+state0 = np.array([1e7, 0.5*np.pi, 0, 0, 0, np.sqrt((Gconst*mass1)/10000000)]) #r0, th0, ph0, vr0, vth0, vph0
 t0 = 0.
 dim = len(state0) #dimensions of state0
 h = 0.001 #setting step size 
@@ -27,8 +27,8 @@ labels = ["r(t)", "th(t)", "ph(t)", "vr(t)", "vth(t)", "vph(t)"]
 def dSdt(state, t):
     r, th, ph, vr, vth, vph = state
     drdt = vr
-    dthdt = vth
-    dphdt = vph
+    dthdt = vth/r
+    dphdt = vph/(r*np.sin(th))
     dvrdt = (-Gconst*mass1)/(r**2) + (r*(vth**2)) + (r*(np.sin(th))**2)*(vph**2)
     dvthdt = ((-2/r)*vr*vth) + ((np.sin(th)*np.cos(th))*(vph**2))
     dvphdt = ((-2/r)*vr*vph) - (((2*np.cos(th))/(np.sin(th)))*vph*vth)

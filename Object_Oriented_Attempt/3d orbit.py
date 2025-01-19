@@ -12,13 +12,14 @@ plt.show(block=True)
 x, y, z, t, vx, vy, vz = symbols("x y z t vx vy vz")
 
 #initial values
-state0 = np.array([10000., 10000., 0., np.sqrt((((6.6743*10**-11)*2*10**15)/np.sqrt(2*10**8))/2), -np.sqrt((((6.6743*10**-11)*2*10**15)/np.sqrt(2*10**8))/2), 0.]) #x0, y0, z0, vx0, vy0, vz0
-t0 = 0.
-dim = len(state0) #dimensions of state0
-h = 10 #setting step size 
-n = 3000
+h = 1 #setting step size 
+n = 30000
 mass1 = 2.E15
 Gconst = 6.67430E-11
+state0_xyz = np.array([10000., 10000., 0., -np.sqrt((((Gconst*mass1))/np.sqrt(2*10**8))/2), np.sqrt(((Gconst*mass1)/np.sqrt(2*10**8))/2), 0.]) #x0, y0, z0, vx0, vy0, vz0
+state0 = state0_xyz 
+t0 = 0.
+dim = len(state0) #dimensions of state0
 labels = ["x(t)", "y(t)", "z(t)", "vx(t)", "vy(t)", "vz(t)"]
 #    velocity_mag = np.sqrt((state[3])**2+(state[4])**2+(state[5])**2) #velocity magnitude from target mass
 

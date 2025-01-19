@@ -1,25 +1,30 @@
+#ODE SOLVER USING RUNGE-KUTTA METHOD
 import numpy as np
+import math
+from sympy import *
 import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import axes3d
+from scipy.interpolate import interp1d
+from Objects import *
 
-# Constants
-mass1 = 2.E15  # Mass of the central body
-Gconst = 6.67430E-11  # Gravitational constant
+plt.show(block=True)
 
-# Initial conditions
-r0 = 1e7  # Initial radial distance
-th0 = np.pi / 2  # Initial angle in the equatorial plane
-ph0 = 0  # Initial azimuthal angle
-vr0 = 1000  # Initial radial velocity (experiment with this)
-vth0 = 0  # Initial angular velocity in the theta direction
-vph0 = np.sqrt((Gconst * mass1) / r0)  # Initial phi velocity
+x, y, z, t, vx, vy, vz, r, th, ph, vr, vth, vph= symbols("x y z t vx vy vz r th ph vr vth vph")
 
-state0 = np.array([r0, th0, ph0, vr0, vth0, vph0])  # Initial state
-t0 = 0  # Start time
-dim = len(state0)  # Dimensions of the state vector
-h = 0.1  # Step size
-n = 10000  # Number of iterations
+#initial values
+mass1 = 2.E15
+Gconst = 6.67430E-11
+state0 = np.array([1e7, 0.5*np.pi, 0, 1000, 0, np.sqrt((Gconst*mass1)/(1e7))])
+ #r0, th0, ph0, vr0, vth0, vph0
+t0 = 0.
+dim = len(state0) #dimensions of state0
+h = 0.01 #setting step size 
+n = 100000
+labels = ["r(t)", "th(t)", "ph(t)", "vr(t)", "vth(t)", "vph(t)"]
+#    velocity_mag = np.sqrt((state[3])**2+(state[4])**2+(state[5])**2) #velocity magnitude from target mass
+#    pos_mag = np.sqrt((state[0])**2+(state[1])**2+(state[2])**2) #position magnitude from target mass
+#    normal_pos = state[0:3]/pos_mag #position direction but magnitude is 1.
 
-# Define the system of equations (derivatives)
 def dSdt(state, t):
     r, th, ph, vr, vth, vph = state
     drdt = vr
@@ -28,52 +33,33 @@ def dSdt(state, t):
     dvrdt = (-Gconst * mass1) / (r**2) + (vth**2 / r) + (vph**2 / r)
     dvthdt = - (2 * vr * vth) / (r**2) + (vph**2 * np.cos(th)) / (r**2 * np.sin(th))
     dvphdt = - (2 * vr * vph) / (r**2 * np.sin(th)) - (vth * vph * np.cos(th)) / (r**2 * np.sin(th)**2)
-    
     return np.array([drdt, dthdt, dphdt, dvrdt, dvthdt, dvphdt])
 
-# Apply periodic correction to keep the motion in the equatorial plane
-def apply_correction(state):
-    r, th, ph, vr, vth, vph = state
-    z = r * np.cos(th)  # Calculate the z-coordinate
-    if np.abs(z) > 1e-15:  # If the z-coordinate deviates too much
-        th = np.pi / 2  # Correct the theta angle to stay in the equatorial plane
-        state[1] = th
-    return state
-
-# Runge-Kutta ODE solver
-def odesolver(t, n, h):
+def odesolver(t, n, h): #For number of iterations 'n' and stepsize 'h'
     state = state0
     t = t0
     tval = np.zeros([n, 1])
     values = np.zeros([n, dim])
-    
-    for j in range(0, n):
-        # Runge-Kutta integration
+    for j in range(0,n):
+        #Runge-Kutta 
         k1 = dSdt(state, t)
-        k2 = dSdt((state + ((h * 0.5) * k1)), t + h * 0.5)
-        k3 = dSdt((state + ((h * 0.5) * k2)), t + h * 0.5)
-        k4 = dSdt((state + ((h * 0.5) * k3)), t + h)
-        
-        state = state + (h / 6.) * (k1 + 2 * k2 + 2 * k3 + k4)
+        k2 = dSdt((state+((h*0.5)*k1)), t+h*0.5)
+        k3 = dSdt((state+((h*0.5)*k2)), t+h*0.5)
+        k4 = dSdt((state+((h*0.5)*k3)), t+h)
+        state = state + (h/6.)*(k1+2*k2+2*k3+k4)
         t += h
-
-        # Apply periodic correction to keep motion in the equatorial plane
-        state = apply_correction(state)
-        
-        # Store values
         values[j] = state
-        tval[j] = t
+        tval[j] = t 
 
     r_vals = values[:, 0]
     th_vals = values[:, 1]
     ph_vals = values[:, 2]
-    
-    # Convert to Cartesian coordinates
     x_vals = r_vals * np.sin(th_vals) * np.cos(ph_vals)
     y_vals = r_vals * np.sin(th_vals) * np.sin(ph_vals)
     z_vals = r_vals * np.cos(th_vals)
 
-    # Plot the orbit in 3D
+    
+
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
     ax.plot(x_vals, y_vals, z_vals)
@@ -82,5 +68,4 @@ def odesolver(t, n, h):
     ax.set_zlabel('z (m)')
     plt.show()
 
-# Solve the ODE and plot the result
 odesolver(t0, n, h)
