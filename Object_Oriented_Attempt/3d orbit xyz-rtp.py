@@ -13,9 +13,8 @@ plt.show(block=True)
 x, y, z, t, vx, vy, vz = symbols("x y z t vx vy vz")
 
 #initial values
-mp.dps = 15; mp.pretty = True
 h = 1 #setting step size 
-n = 60000
+n = 90000
 mass1 = 2.E15
 Gconst = 6.67430E-11
 state0_xyz = np.array([10000., 10000., 0., -np.sqrt((((Gconst*mass1))/np.sqrt(2*10**8))/2), np.sqrt(((Gconst*mass1)/np.sqrt(2*10**8))/2), 0.]) #x0, y0, z0, vx0, vy0, vz0
@@ -34,6 +33,7 @@ v_theta = (z * (x * vx + y * vy) - polar_radius**2 * vz) / (polar_radius**2 * np
 v_phi = (x * vy - y * vx) / (x**2 + y**2)
 
 state0 = np.array([polar_radius, polar_theta, polar_phi, v_r, v_theta, v_phi])
+print(state0)
 
 def dSdt(state, t):
     r, th, ph, vr, vth, vph = state
@@ -63,17 +63,29 @@ def odesolver(t, n, h): #For number of iterations 'n' and stepsize 'h'
         values[j] = state
         tval[j] = t 
     val = values[:, 2]
-    for i in range(np.shape(val)[0]-1):
-        if min(val[i], val[i + 1]) <= 2*np.pi + state0[2] <= max(val[i], val[i + 1]):
-            local_interpolator = interp1d([val[i], val[i + 1]], [tval[i].flatten()[0], tval[i + 1].flatten()[0]], bounds_error=True)
-            t_ints.append(local_interpolator(2*np.pi+state0[2]))
-
-    if not t_ints:
-        print(f"Couldn't find a time where the orbit reaches initial state.")
+    n=1
+    #testing if phi is increasing or decreasing to see when an orbit happens
+    if val[0]-val[1] <= 0: 
+        for i in range(np.shape(val)[0]-1):
+            if min(val[i], val[i + 1]) <= 2*n*np.pi + state0[2] <= max(val[i], val[i + 1]):
+                local_interpolator = interp1d([val[i], val[i + 1]], [tval[i].flatten()[0], tval[i + 1].flatten()[0]], bounds_error=True)
+                t_ints.append(local_interpolator(2*n*np.pi+state0[2]))
+                n+=1
+        if not t_ints:
+            print(f"Couldn't find a time where the orbit reaches initial state. Orbit is anticlockwise.")
+        else:
+            print(f"Times where the orbit = initial state: {[float(time) for time in t_ints]} seconds. Orbit is anticlockwise")
     else:
-        print(f"Times where the orbit = initial state: {[float(time) for time in t_ints]} seconds")
-
-
+        for i in range(np.shape(val)[0]-1):
+            if min(val[i], val[i + 1]) <= -2*n*np.pi + state0[2] <= max(val[i], val[i + 1]):
+                local_interpolator = interp1d([val[i], val[i + 1]], [tval[i].flatten()[0], tval[i + 1].flatten()[0]], bounds_error=True)
+                t_ints.append(local_interpolator(-2*n*np.pi+state0[2]))
+                n+=1
+        if not t_ints:
+            print(f"Couldn't find a time where the orbit reaches initial state. Orbit is clockwise")
+        else:
+            print(f"Times where the orbit = initial state: {[float(time) for time in t_ints]} seconds. Orbit is clockwise.")
+    #converting to cartesian to plot
     r_vals = values[:, 0]
     th_vals = values[:, 1]
     ph_vals = values[:, 2]

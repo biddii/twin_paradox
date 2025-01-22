@@ -47,5 +47,6 @@ class Polar_stationary_plot:
         ax.set_xlabel('x position')
         ax.set_ylabel('y position')
         ax.set_zlabel('z position')
+        plt.axis('equal')
         plt.show()
     
