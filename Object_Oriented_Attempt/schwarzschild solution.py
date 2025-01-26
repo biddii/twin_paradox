@@ -31,7 +31,6 @@ th_dot0 = (v_th0)/(r0)
 ph_dot0 = (v_ph0)/((r0)*(np.sin(th0)))
 f_dot0 = np.sqrt((((r_dot0**2)/(1-2*mass1/r0)) + (r0**2)*((th_dot0**2)+(((np.sin(th0))**2)*(ph_dot0**2))) - q_const)/(1-(2*mass1/r0)))
 
-print(f_dot0)
 #initial time velocity calc ^^^^^ above f0
 
 state0 = np.array([r0, th0, ph0, f0])
@@ -45,7 +44,7 @@ K_val = (r0**4)*((th_dot0**2)+(((np.sin(th0))**2)*(ph_dot0**2)))
 t0 = 0.
 dim = len(state0) #dimensions of state0
 h = 0.001 #setting step size 
-n = 300000
+n = 200000
 labels = ["r(t)", "th(t)", "ph(t)", "r_dot(t)", "th_dot(t)", "ph_dot(t)"]
 
 
@@ -75,6 +74,7 @@ def odesolver(t, n, h):
     tval = np.zeros([n, 1])
     values = np.zeros([n, dim])
     t_ints = []
+    f_ints = []
     
     #setting sign values
     sign_r_dot = -1 if r_dot0 < 0 else 1
@@ -93,30 +93,37 @@ def odesolver(t, n, h):
         values[j] = state
         tval[j] = t
     val = values[:, 2]
+    fval = values[:, 3]
     n=1
     #testing if phi is increasing or decreasing to see when an orbit happens
     if val[0]-val[1] <= 0: 
         for i in range(np.shape(val)[0]-1):
             if min(val[i], val[i + 1]) <= 2*n*np.pi + state0[2] <= max(val[i], val[i + 1]):
-                local_interpolator = interp1d([val[i], val[i + 1]], [tval[i].flatten()[0], tval[i + 1].flatten()[0]], bounds_error=True)
-                t_ints.append(local_interpolator(2*n*np.pi+state0[2]))
+                tlocal_interpolator = interp1d([val[i], val[i + 1]], [tval[i].flatten()[0], tval[i + 1].flatten()[0]], bounds_error=True)
+                t_ints.append(tlocal_interpolator(2*n*np.pi+state0[2]))
+
+                flocal_interpolator = interp1d([val[i], val[i + 1]], [fval[i].flatten()[0], fval[i + 1].flatten()[0]], bounds_error=True)
+                f_ints.append(flocal_interpolator(2*n*np.pi+state0[2]))
                 n+=1
         if not t_ints:
             print(f"Couldn't find a time where the orbit reaches initial state. Orbit is anticlockwise.")
         else:
-            print(f"Times where the orbit = initial state: {[float(time) for time in t_ints]} seconds. Orbit is anticlockwise")
+            print(f"Times where the orbit = initial state: {[float(time) for time in t_ints]} proper time units (orbiting). Orbit is anticlockwise")
+            print(f"Times where the orbit = initial state: {[float(time) for time in f_ints]} time units (stationary). Orbit is anticlockwise")
     else:
         for i in range(np.shape(val)[0]-1):
             if min(val[i], val[i + 1]) <= -2*n*np.pi + state0[2] <= max(val[i], val[i + 1]):
-                local_interpolator = interp1d([val[i], val[i + 1]], [tval[i].flatten()[0], tval[i + 1].flatten()[0]], bounds_error=True)
-                t_ints.append(local_interpolator(-2*n*np.pi+state0[2]))
+                tlocal_interpolator = interp1d([val[i], val[i + 1]], [tval[i].flatten()[0], tval[i + 1].flatten()[0]], bounds_error=True)
+                t_ints.append(tlocal_interpolator(2*n*np.pi+state0[2]))
+
+                flocal_interpolator = interp1d([val[i], val[i + 1]], [fval[i].flatten()[0], fval[i + 1].flatten()[0]], bounds_error=True)
+                f_ints.append(flocal_interpolator(2*n*np.pi+state0[2]))
                 n+=1
         if not t_ints:
-            print(f"Couldn't find a time where the orbit reaches initial state. Orbit is clockwise")
+            print(f"Couldn't find a time where the orbit reaches initial state. Orbit is anticlockwise.")
         else:
-            print(f"Times where the orbit = initial state: {[float(time) for time in t_ints]} seconds. Orbit is clockwise.")
-    print(tval[:])
-    print(values[:,2])
+            print(f"Times where the orbit = initial state: {[float(time) for time in t_ints]} proper time units (orbiting). Orbit is anticlockwise")
+            print(f"Times where the orbit = initial state: {[float(time) for time in f_ints]} time units (stationary). Orbit is anticlockwise")
     #converting to xyz for plot
     r_vals = values[:, 0]
     th_vals = values[:, 1]
