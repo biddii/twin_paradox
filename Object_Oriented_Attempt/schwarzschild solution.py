@@ -55,7 +55,7 @@ def dSdt(state, t, sign_r_dot, sign_th_dot):
     th_dot2 = (K_val-((L_val**2)/((np.sin(th))**2)))/(r**4)
     f_dot = (-E_val)/(1-(2*mass1/r))
 
-    #theta dot and r dot value fixing due to the square
+    #theta dot and r dot value fixing due to the square (i think error is here):
     if r_dot2 < 0:
         r_dot2 = -r_dot2  #making sqrt positive
         sign_r_dot *= -1  #flipping the sign
@@ -120,10 +120,10 @@ def odesolver(t, n, h):
                 f_ints.append(flocal_interpolator(2*n*np.pi+state0[2]))
                 n+=1
         if not t_ints:
-            print(f"Couldn't find a time where the orbit reaches initial state. Orbit is anticlockwise.")
+            print(f"Couldn't find a time where the orbit reaches initial state. Orbit is clockwise.")
         else:
-            print(f"Times where the orbit = initial state: {[float(time) for time in t_ints]} proper time units (orbiting). Orbit is anticlockwise")
-            print(f"Times where the orbit = initial state: {[float(time) for time in f_ints]} time units (stationary). Orbit is anticlockwise")
+            print(f"Times where the orbit = initial state: {[float(time) for time in t_ints]} proper time units (orbiting). Orbit is clockwise")
+            print(f"Times where the orbit = initial state: {[float(time) for time in f_ints]} time units (stationary). Orbit is clockwise")
     #converting to xyz for plot
     r_vals = values[:, 0]
     th_vals = values[:, 1]
@@ -132,6 +132,7 @@ def odesolver(t, n, h):
     y_vals = r_vals * np.sin(th_vals) * np.sin(ph_vals)
     z_vals = r_vals * np.cos(th_vals)
 
+    #plot
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
     ax.plot(x_vals, y_vals, z_vals)
@@ -146,5 +147,3 @@ def odesolver(t, n, h):
 #running it
 odesolver(t0, n, h)
 
-
-#add in values the state0 as i = 0 of array
