@@ -17,75 +17,82 @@ Gconst = 1.
 q_const = -1 #-1 for mass, 0 for massless
 
 #initial conditions variables to change, ensure not greater than 1 for v_
-r0 = 3.
+r0 = 5
 th0 = 0.5*np.pi
 ph0 = 0.
-v_r0 = 0
+f0 = 0.
+v_r0 = 0.
 v_th0 = 0.
 v_ph0 = np.sqrt(Gconst*mass1/r0)
 
 #do not change these formulas
 r_dot0 = v_r0
-th_dot0 = v_th0/r0
-ph_dot0 = v_ph0/(r0*np.sin(th0))
-f_dot0 = np.sqrt((q_const-(((1-(2*mass1/r0))**(-1))*(r_dot0**2))-((r0**2)*((th_dot0**2)+((np.sin(th0))**2)*(ph_dot0**2))))/(-1+(2*mass1/r0)))
-#initial time velocity calc ^^^^^
+th_dot0 = (v_th0)/(r0)
+ph_dot0 = (v_ph0)/((r0)*(np.sin(th0)))
+f_dot0 = np.sqrt((((r_dot0**2)/(1-2*mass1/r0)) + (r0**2)*((th_dot0**2)+(((np.sin(th0))**2)*(ph_dot0**2))) - q_const)/(1-(2*mass1/r0)))
 
-state0 = np.array([r0, th0, ph0, f_dot0])
+print(f_dot0)
+#initial time velocity calc ^^^^^ above f0
 
+state0 = np.array([r0, th0, ph0, f0])
 
-E_val = -1*(1-((2*mass1)/r0))*f_dot0
-L_val = (r0**2)*((np.sin(th0))**2)*ph_dot0
+#constants of motion
+E_val = -(f_dot0)*(1-(2*mass1/r0))
+L_val = (ph_dot0)*(r0**2)*(((np.sin(th0))**2))
 K_val = (r0**4)*((th_dot0**2)+(((np.sin(th0))**2)*(ph_dot0**2)))
-
 
 #important numbers
 t0 = 0.
 dim = len(state0) #dimensions of state0
-h = 0.01 #setting step size 
-n = 10000
+h = 0.001 #setting step size 
+n = 300000
 labels = ["r(t)", "th(t)", "ph(t)", "r_dot(t)", "th_dot(t)", "ph_dot(t)"]
 
-def dSdt(state, t):
+
+def dSdt(state, t, sign_r_dot, sign_th_dot):
     r, th, ph, f = state
-    ph_dot = L_val/((r**2)*((np.sin(th))**2))
-    r_dot2 = (E_val**2)+((1-(2*mass1/r))*(q_const-(K_val/(r**2))))
-    th_dot2 = (1/(r**4))*(K_val-((L_val**2)/(np.sin(th))**2))
-    f_dot = -E_val*((1-((2*mass1)/r))**-1)
+    ph_dot = (L_val)/((r**2)*((np.sin(th))**2))
+    r_dot2 = (E_val)**2 + ((1-(2*mass1/r))*(q_const - (K_val/(r**2))))
+    th_dot2 = (K_val-((L_val**2)/((np.sin(th))**2)))/(r**4)
+    f_dot = (-E_val)/(1-(2*mass1/r))
+
+    #theta dot and r dot value fixing due to the square
+    if r_dot2 < 0:
+        r_dot2 = -r_dot2  #making sqrt positive
+        sign_r_dot *= -1  #flipping the sign
+    r_dot = sign_r_dot * np.sqrt(r_dot2)
 
     if th_dot2 < 0:
-        th_dot2 = -1*th_dot2
-        th_dot = -np.sqrt(th_dot2)
-    else: 
-        th_dot = np.sqrt(th_dot2)
+        th_dot2 = -th_dot2  #making sqrt positive
+        sign_th_dot *= -1  #flipping the sign
+    th_dot = sign_th_dot * np.sqrt(th_dot2)
 
-    if r_dot2 < 0:
-        r_dot2 = -1*r_dot2
-        r_dot = -np.sqrt(r_dot2)
-    else:
-        r_dot = np.sqrt(r_dot2)
-    
+    return np.array([r_dot, th_dot, ph_dot, f_dot]), sign_r_dot, sign_th_dot
 
-    return np.array([r_dot, th_dot, ph_dot, f_dot])
-
-
-def odesolver(t, n, h): #For number of iterations 'n' and stepsize 'h'
-    state = state0
+def odesolver(t, n, h):
+    state = np.copy(state0)
     t = t0
     tval = np.zeros([n, 1])
     values = np.zeros([n, dim])
     t_ints = []
-    for j in range(0,n):
-        #Runge-Kutta for r, theta, phi, f respect to t
-        k1 = dSdt(state, t)
-        k2 = dSdt((state+((h*0.5)*k1)), t+h*0.5)
-        k3 = dSdt((state+((h*0.5)*k2)), t+h*0.5)
-        k4 = dSdt((state+((h*0.5)*k3)), t+h)
-        state = state + (h/6.)*(k1+2*k2+2*k3+k4)
+    
+    #setting sign values
+    sign_r_dot = -1 if r_dot0 < 0 else 1
+    sign_th_dot = -1 if th_dot0 < 0 else 1
+
+    for j in range(n):
+        #Runge-Kutta and sign tracking
+        k1, sign_r_dot, sign_th_dot = dSdt(state, t, sign_r_dot, sign_th_dot)
+        k2, sign_r_dot, sign_th_dot = dSdt(state + 0.5 * h * k1, t + 0.5 * h, sign_r_dot, sign_th_dot)
+        k3, sign_r_dot, sign_th_dot = dSdt(state + 0.5 * h * k2, t + 0.5 * h, sign_r_dot, sign_th_dot)
+        k4, sign_r_dot, sign_th_dot = dSdt(state + h * k3, t + h, sign_r_dot, sign_th_dot)
+
+        #updating state and time
+        state += (h / 6) * (k1 + 2 * k2 + 2 * k3 + k4)
         t += h
         values[j] = state
-        tval[j] = t 
-    val = values[:, 2] #setting val to all of the phi values
+        tval[j] = t
+    val = values[:, 2]
     n=1
     #testing if phi is increasing or decreasing to see when an orbit happens
     if val[0]-val[1] <= 0: 
@@ -108,21 +115,29 @@ def odesolver(t, n, h): #For number of iterations 'n' and stepsize 'h'
             print(f"Couldn't find a time where the orbit reaches initial state. Orbit is clockwise")
         else:
             print(f"Times where the orbit = initial state: {[float(time) for time in t_ints]} seconds. Orbit is clockwise.")
-    #converting to cartesian to plot
+    print(tval[:])
+    print(values[:,2])
+    #converting to xyz for plot
     r_vals = values[:, 0]
     th_vals = values[:, 1]
     ph_vals = values[:, 2]
     x_vals = r_vals * np.sin(th_vals) * np.cos(ph_vals)
     y_vals = r_vals * np.sin(th_vals) * np.sin(ph_vals)
     z_vals = r_vals * np.cos(th_vals)
-    
 
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
     ax.plot(x_vals, y_vals, z_vals)
-    ax.set_xlabel('x (m)')
-    ax.set_ylabel('y (m)')
-    ax.set_zlabel('z (m)')
+    ax.plot(0,0,0, 'ro')
+    ax.set_xlabel("x (m)")
+    ax.set_ylabel("y (m)")
+    ax.set_zlabel("z (m)")
     plt.axis('equal')
     plt.show()
+
+
+#running it
 odesolver(t0, n, h)
+
+
+#add in values the state0 as i = 0 of array
