@@ -17,43 +17,57 @@ Gconst = 1.
 q_const = -1 #-1 for mass, 0 for massless
 
 #initial conditions variables to change, ensure not greater than 1 for v_
-r0 = 4
+r0 = 10
 th0 = 0.5*np.pi
 ph0 = 0.
 f0 = 0.
 v_r0 = 0.
 v_th0 = 0.
-v_ph0 = ((1/(np.sqrt((r0/mass1)-3)))/(r0))
+v_ph0 = 10*((1/(np.sqrt((r0/mass1)-3)))/(r0))
+a_mom0 = 0.1
 
 #do not change these formulas
+p_simp0 = np.sqrt((r0**2)+(((a_mom0)**2)*((np.cos(th0))**2)))
+delta_simp0 = (r0**2)-(2*(mass1)*(r0))+(a_mom0**2)
 r_dot0 = v_r0
 th_dot0 = (v_th0)/(r0)
 ph_dot0 = (v_ph0)/((r0)*(np.sin(th0)))
 f_dot0 = np.sqrt((((r_dot0**2)/(1-2*mass1/r0)) + (r0**2)*((th_dot0**2)+(((np.sin(th0))**2)*(ph_dot0**2))) - q_const)/(1-(2*mass1/r0)))
 
-#initial time velocity calc ^^^^^ above f0
-
 state0 = np.array([r0, th0, ph0, f0])
 
-#constants of motion
-E_val = -(f_dot0)*(1-(2*mass1/r0))
-L_val = (ph_dot0)*(r0**2)*(((np.sin(th0))**2))
-K_val = (r0**4)*((th_dot0**2)+(((np.sin(th0))**2)*(ph_dot0**2)))
+#constants of motion  & simplified parts of it to make it easier
+g_tt = (-1+((2*mass1*r0)/(p_simp0**2)))
+g_tphi = ((-2*mass1*r0*a_mom0*((np.sin(th0))**2))/(p_simp0**2))
+g_phiphi = ((r0**2) + (a_mom0**2) + (g_tphi*(-a_mom0)))*(np.sin(th0)**2)
+
+E_val = -1*((g_tt*f_dot0)+(g_tphi*ph_dot0))
+L_val = (g_tphi*f_dot0)+(g_phiphi*ph_dot0)
+P_simp0 = ((r0**2) + (a_mom0**2))*E_val - L_val*a_mom0
+D_simp0 = L_val - (E_val*a_mom0*(np.sin(th0)**2))
+K_val = (p_simp0**4)*(th_dot0**2) - (q_const*(a_mom0)**2)*(np.cos(th0)**2) + (D_simp0**2)/(np.sin(th0)**2)
+
+
 
 #important numbers
 t0 = 0.
 dim = len(state0) #dimensions of state0
-h = 0.0001 #setting step size 
-n = 1030000
+h = 0.001 #setting step size 
+n = 500000
 labels = ["r(t)", "th(t)", "ph(t)", "r_dot(t)", "th_dot(t)", "ph_dot(t)"]
 
 
 def dSdt(state, t, sign_r_dot, sign_th_dot):
     r, th, ph, f = state
-    ph_dot = (L_val)/((r**2)*((np.sin(th))**2))
-    r_dot2 = (E_val)**2 + ((1-(2*mass1/r))*(q_const - (K_val/(r**2))))
-    th_dot2 = (K_val-((L_val**2)/((np.sin(th))**2)))/(r**4)
-    f_dot = (-E_val)/(1-(2*mass1/r))
+    P_simp = ((r**2) + (a_mom0**2))*E_val - L_val*a_mom0
+    D_simp = L_val - (E_val*a_mom0*(np.sin(th)**2))
+    p_simp = np.sqrt((r**2)+(((a_mom0)**2)*((np.cos(th))**2)))
+    delta_simp = (r**2)-(2*(mass1)*(r))+(a_mom0**2)
+
+    ph_dot = ((D_simp/(np.sin(th)**2)) + ((a_mom0*P_simp)/(delta_simp)))/(p_simp**2)
+    r_dot2 = ((delta_simp)*(q_const*(r**2)-K_val) + P_simp**2)/(p_simp**4)
+    th_dot2 = (K_val + (q_const*(a_mom0**2)*(np.cos(th)**2)) - (D_simp**2/(np.sin(th)**2)))/(p_simp**4)
+    f_dot = ((a_mom0)*(D_simp) + ((r**2 + a_mom0**2)*P_simp)/(delta_simp))/(p_simp**2)
 
     #theta dot and r dot value fixing due to the square (i think error is here):
     
@@ -66,6 +80,7 @@ def dSdt(state, t, sign_r_dot, sign_th_dot):
         th_dot2 = -th_dot2  #making sqrt positive
         sign_th_dot *= -1  #flipping the sign
     th_dot = sign_th_dot * np.sqrt(th_dot2)
+
 
     return np.array([r_dot, th_dot, ph_dot, f_dot]), sign_r_dot, sign_th_dot
 
