@@ -24,6 +24,7 @@ f0 = 0.
 v_r0 = 0.
 v_th0 = 0.
 v_ph0 = ((1/(np.sqrt((r0/mass1)-3)))/(r0))
+print(v_ph0)
 
 #do not change these formulas
 r_dot0 = v_r0

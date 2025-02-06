@@ -1,34 +1,29 @@
-#ODE SOLVER USING EULER's METHOD
-# Define an ODE solver function
-# input dy/dx 
-# input starting conditions on y0 and x0
-# input n and h (step size)
-# execute the function
 import numpy as np
-import math
-from sympy import * 
 import matplotlib.pyplot as plt
 
-plt.show(block=True)
-
-x, y, z, t = symbols("x y z t")
-
-x = "-10"
-y = "2"
-
-x_val = []
-y_val = []
-
-def odesolver(x, y, n, h): #For number of iterations 'n' and stepsize 'h'   
-    equation = input("What is dydx?")
-    for j in range(0,n):
-        dydx = eval(equation)
-        x = round(x + h, 50)
-        y = round(y + dydx*h, 50)
+def odesolver(f, x0, y0, n, h):
+    x = x0
+    y = y0
+    x_val = [x]
+    y_val = [y]
+    
+    for i in range(n):
+        dydx = f(x)
+        x += h
+        y += dydx * h
         x_val.append(x)
         y_val.append(y)
-    print("x = ",x,"y = ",y)
+    
+    print(f"x = {x}, y = {y}")
     plt.plot(x_val, y_val)
+    plt.xlabel("x")
+    plt.ylabel("y")
+    plt.title("Euler's Method ODE Solver")
     plt.show()
 
-odesolver(eval(x), eval(y), 20000, 0.001)
+#defining dy/dx
+def func(x):
+    return np.sin(x)
+
+#running the code
+odesolver(func, x0=-5, y0=2, n=10, h=1)

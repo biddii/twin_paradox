@@ -8,18 +8,18 @@ plt.show(block=True)
 x, y, z, t = symbols("x y z t")
 
 #initial values
-state0 = np.array([1., 1., 1.])
-t0 = 0.
+state0 = np.array([0., 0., 0.])
+t0 = -5.
 dim = 3
-h = 0.001 #setting step size
-n = 10000
+h = 1 #setting step size
+n = 10
 labels = ["x(t)", "y(t)", "z(t)"]
 
 def dSdt(state, t): #where state is an array
     x, y, z = state
-    dxdt = (y) #defining dxdt as y, thus x should be the integration of y in the plot
-    dydt = (0) #arbitrary function i picked for dy/dt 
-    dzdt = (x)
+    dxdt = (t) #defining dxdt as y, thus x should be the integration of y in the plot
+    dydt = (t**2) #arbitrary function i picked for dy/dt 
+    dzdt = (np.sin(t))
     val = np.array([dxdt, dydt, dzdt])
     return val
 def odesolver(t, n, h): #For number of iterations 'n' and stepsize 'h'

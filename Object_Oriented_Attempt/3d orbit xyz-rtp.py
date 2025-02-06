@@ -17,7 +17,7 @@ h = 1 #setting step size
 n = 90000
 mass1 = 2.E15
 Gconst = 6.67430E-11
-state0_xyz = np.array([10000., 10000., 0., -np.sqrt((((Gconst*mass1))/np.sqrt(2*10**8))/2), np.sqrt(((Gconst*mass1)/np.sqrt(2*10**8))/2), 0.]) #x0, y0, z0, vx0, vy0, vz0
+state0_xyz = np.array([10000., 10000., 0., -1.7*np.sqrt((((Gconst*mass1))/np.sqrt(2*10**8))/2), np.sqrt(((Gconst*mass1)/np.sqrt(2*10**8))/2), 0.]) #x0, y0, z0, vx0, vy0, vz0
 t0 = 0.
 dim = len(state0_xyz) #dimensions of state0
 labels = ["x(t)", "y(t)", "z(t)", "vx(t)", "vy(t)", "vz(t)"]
@@ -100,5 +100,6 @@ def odesolver(t, n, h): #For number of iterations 'n' and stepsize 'h'
     ax.set_xlabel('x (m)')
     ax.set_ylabel('y (m)')
     ax.set_zlabel('z (m)')
+    plt.axis('equal')
     plt.show()
 odesolver(t0, n, h)

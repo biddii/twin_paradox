@@ -23,7 +23,7 @@ ph0 = 0.
 f0 = 0.
 v_r0 = 0.
 v_th0 = 0.
-v_ph0 = 10*((1/(np.sqrt((r0/mass1)-3)))/(r0))
+v_ph0 = -10*((1/(np.sqrt((r0/mass1)-3)))/(r0))
 a_mom0 = 0.1
 
 #do not change these formulas
@@ -52,7 +52,7 @@ K_val = (p_simp0**4)*(th_dot0**2) - (q_const*(a_mom0)**2)*(np.cos(th0)**2) + (D_
 #important numbers
 t0 = 0.
 dim = len(state0) #dimensions of state0
-h = 0.001 #setting step size 
+h = 0.01 #setting step size 
 n = 500000
 labels = ["r(t)", "th(t)", "ph(t)", "r_dot(t)", "th_dot(t)", "ph_dot(t)"]
 
